@@ -17,7 +17,6 @@ $template->assign(
 
 $me = new Ldap();
 $me->load_config();
-$me->ldap_conn();
 
 // we start the template generation by feeding with the settings (defaults or read from config).
 $template->assign('HOST', 	$me->config['host']);
@@ -78,7 +77,6 @@ if (isset($_POST['save'])){
 // Check LDAP configuration
 // the user need to have saved his config to do that.
 if (isset($_POST['check_ldap'])){
-
 	if ($me->config['users_group']) {
 		if ($me->user_membership($_POST['USERNAME'],$me->ldap_group($me->config['users_group']))) {
 			if ($me->ldap_bind_as($_POST['USERNAME'],$_POST['PASSWORD'])){

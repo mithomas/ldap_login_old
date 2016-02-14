@@ -54,7 +54,8 @@ function ld_init(){
 }
 
 function fail($username) {
-	trigger_action('login_failure', stripslashes($username));
+	//trigger_action('login_failure', stripslashes($username));
+	trigger_notify('login_failure', stripslashes($username));
 	return false;
 }
 
@@ -126,7 +127,8 @@ function login($success, $username, $password, $remember_me){
 				update_user($username,$row['id']);
 				
 				log_user($row['id'], $remember_me);
-				trigger_action('login_success', stripslashes($username));
+				//trigger_action('login_success', stripslashes($username));
+                                trigger_notify('login_success', stripslashes($username));
 				
 				return True;
 			}
@@ -145,14 +147,15 @@ function login($success, $username, $password, $remember_me){
 					}
 			
 					// we actually register the new user
-					$new_id = register_user($username,random_password(8),$mail);
+					$new_id = register_user($username,random_password(12),$mail);
 					update_user($username,$new_id);
                         
 					// now we fetch again his id in the piwigo db, and we get them, as we just created him !
 					log_user($new_id, False);
 					
-					trigger_action('login_success', stripslashes($username));
-					
+					//trigger_action('login_success', stripslashes($username));
+					trigger_notify('login_success', stripslashes($username));
+
 					redirect('profile.php');
 					return true;
 				}

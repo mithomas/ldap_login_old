@@ -36,7 +36,8 @@ class Ldap_Login_maintain extends PluginMaintain
     global $conf;
     $config=new Ldap();
     
-    if (file_exists(LDAP_LOGIN_PATH.'data.dat' )) {
+    //if (file_exists(LDAP_LOGIN_PATH.'data.dat' )) {
+    if (empty($conf['ldap_login_plugin'])){
     $config->load_config();
     }
     
@@ -63,7 +64,7 @@ class Ldap_Login_maintain extends PluginMaintain
       $this->install($plugin_version, $errors);
     }
   }
-  
+
   function deactivate()
   {
   }

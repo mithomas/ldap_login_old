@@ -1,11 +1,6 @@
 <?php
-<<<<<<< HEAD
 global $conf;
 class Ldap {
-=======
-class Ldap {
-
->>>>>>> 95bfabcd664aadd7a805767c5d6a580841069ab9
 	var $cnx;
 	var $config;
 
@@ -29,19 +24,18 @@ class Ldap {
 		if (!$this->ldap_conn()) {
 			return $this->getErrorString();
 		}
-
 		// test du compte root si renseigné
-		if (!empty($this->config['ld_binddn']) && !empty($this->config['ld_bindpw'])){ // if empty ld_binddn, anonymous search
-			// authentication with rootdn and rootpw for search
-			if (!$this->ldap_bind_as($this->config['ld_binddn'],$this->config['ld_bindpw'])){
-				return $this->getErrorString();
-			}
-		} else {
+//		if (!empty($this->config['ld_binddn']) && !empty($this->config['ld_bindpw'])){ // if empty ld_binddn, anonymous search
+//			// authentication with rootdn and rootpw for search
+//			if (!$this->ldap_bind_as($this->config['ld_binddn'],$this->config['ld_bindpw'])){
+//				return $this->getErrorString();
+//			}
+//		} else {
 			// sinon recherche du basedn (cf comportement ldap_connect avec OpenLDAP)
 			if (!$this->ldap_check_basedn()){ // search userdn
 				return $this->getErrorString();
 			}
-		}
+//		}
 		return true;
 	}
 	
@@ -59,33 +53,39 @@ class Ldap {
 		$this->config['ld_use_ssl'] = False;
 		$this->config['ld_bindpw'] ='';
 		$this->config['ld_binddn'] ='';
-
-	function load_config(){
+	}
+	public function load_config(){
 		// first, load the hard coded defaults, then apply the one from the file.
 		// that way, when we begin setting the conf', there is already sane defaults. And there is no holes in it !
 		$this->load_default_config();
-		
-		$conf_file = @file_get_contents( LDAP_LOGIN_PATH.'data.dat' );
-		if ($conf_file!==false)
-		{
-			$this->config = unserialize($conf_file);
-			
-			// user and groupbranches + basedn make full_groupbranch. 
-			// that way, we can save one ldap request when logging (see ldap_name).
-			
-			$this->full_usersbranch = $this->config['usersbranch'].','.$this->config['basedn'];
- 			$this->full_groupbranch = $this->config['groupbranch'].','.$this->config['basedn'];
-		}
+                global $conf;
+                if (!empty($conf['ldap_login_plugin'])){
+                   $this->config = unserialize($conf['ldap_login_plugin']);
+                   $this->full_usersbranch = $this->config['usersbranch'].','.$this->config['basedn'];
+                   $this->full_groupbranch = $this->config['groupbranch'].','.$this->config['basedn'];
+                }
+//		$conf_file = @file_get_contents( LDAP_LOGIN_PATH.'data.dat' );
+//		if ($conf_file!==false)
+//		{
+//			$this->config = unserialize($conf_file);
+//			
+//			// user and groupbranches + basedn make full_groupbranch. 
+//			// that way, we can save one ldap request when logging (see ldap_name).
+//			
+//			$this->full_usersbranch = $this->config['usersbranch'].','.$this->config['basedn'];
+ //			$this->full_groupbranch = $this->config['groupbranch'].','.$this->config['basedn'];
+//		}
 	}
 
-	function save_config(){
-		$file = fopen( LDAP_LOGIN_PATH.'/data.dat', 'w' );
-		fwrite($file, serialize($this->config) );
-		fclose( $file );
+	public function save_config(){
+		//$file = fopen( LDAP_LOGIN_PATH.'/data.dat', 'w' );
+		//fwrite($file, serialize($this->config) );
+		//fclose( $file );
+                 conf_update_param('ldap_login_plugin', serialize($this->config));
 	}
 
 	// basically loads the menu in piwigo admin.
-	function ldap_admin_menu($menu){
+	public function ldap_admin_menu($menu){
 		array_push($menu,
 		array(
 		'NAME' => 'Ldap Login',
@@ -120,11 +120,9 @@ class Ldap {
 		// first, we initializes connection to ldap
 		if ($this->cnx = @ldap_connect($this->config['uri'])){
 				@ldap_set_option($this->cnx, LDAP_OPT_PROTOCOL_VERSION, 3); // LDAPv3 if possible
-		
 			// then we authenticate if anonymous search is forbidden
-			if (!empty($obj->config['ld_binddn']) && !empty($obj->config['ld_bindpw'])){
-				$password = strtr($obj->config['ld_bindpw'], array("\'"=>"'"));
-			
+			if (!empty($this->config['ld_binddn']) && !empty($this->config['ld_bindpw'])){
+				$password = strtr($this->config['ld_bindpw'], array("\'"=>"'"));
 				if (@ldap_bind($this->cnx,$this->config['ld_binddn'],$password)){
 					return true;
 				}
@@ -152,7 +150,8 @@ class Ldap {
 		if ($this->config['ld_search_users']) {
 			return $this->ldap_search_dn($name);
 		}
-		else { return $this->config['ld_attr'].'='.$name.','.$this->full_usersbranch; }
+		else {
+                      return $this->config['ld_attr'].'='.$name.','.$this->full_usersbranch; }
 	}
 	
 	public function ldap_group($groupname){
@@ -170,9 +169,9 @@ class Ldap {
 	// authentication in the ldap server.
 	// the function needs bare login name and password.
 	// the ldap_name function will be used to provide the ldap syntax
-	public function ldap_bind_as($user,$user_passwd){
-		$user_passwd = strtr($user_passwd, array("\'"=>"'"));
-		
+//	public function ldap_bind_as($user,$user_passwd){
+//		$user_passwd = strtr($user_passwd, array("\'"=>"'"));
+//		
 
 	// authentication
 	public function ldap_bind_as($user,$user_passwd){
@@ -197,8 +196,8 @@ class Ldap {
 	// this function must return an array.
 	public function ldap_search_group($to_search){
 		$ld_group = $this->config['ld_group'];
-		
-		$sr=@ldap_search($this->cnx, $this->full_groupbranch, "($ld_group=$to_search)", array('dn'),0,0);
+		//$sr=@ldap_search($this->cnx, $this->full_groupbranch, "($ld_group=$to_search)", array('dn'),0,0);
+		$sr=@ldap_search($this->cnx, $this->config['basedn'], "($ld_group=$to_search)", array('dn'),0,0);
 		$groups = @ldap_get_entries($this->cnx, $sr);
 		$result = array();
 		foreach ($groups as $group) {
@@ -212,7 +211,6 @@ class Ldap {
 		
 		if(($results=@ldap_search($this->cnx,$this->config['basedn'],"($ld_attr=$to_search)",array('dn','mail',$ld_attr)))!==false)
 		$entry = @ldap_first_entry($this->cnx, $results);
-		
 		if($entry==null)
 		{
 		return false;
@@ -221,7 +219,7 @@ class Ldap {
 		else
 		{	if(($userDn=ldap_get_dn($this->cnx,$entry))!==false)
 			{
-				return $userDN;
+				return $userDn;
 			}
 			else
 			{
@@ -273,8 +271,7 @@ class Ldap {
 	$entries = @ldap_get_entries($this->cnx, $search);
 	}
 	
-	public function getRootDse(){
-
+	function getRootDse(){
         $search = @ldap_read($this->cnx, NULL, 'objectClass=*', array("*", "+"));
         $entries = @ldap_get_entries($this->cnx, $search);
         return $entries[0];

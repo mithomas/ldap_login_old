@@ -12,24 +12,24 @@ global $template;
 $template->set_filenames( array('plugin_admin_content' => dirname(__FILE__).'/newusers.tpl') );
 $template->assign(
   array(
-    'PLUGIN_NEWUSERS' => get_root_url().'admin.php?page=plugin-Ldap_Login-newusers',
+    'PLUGIN_NEWUSERS' => get_root_url().'admin.php?page=plugin-ldap_login-newusers',
     ));
 
 $me = new Ldap();
 $me->load_config();
 
 // do we allow new users to have a piwigo login created if they have a valid ldap login ?
-$template->assign('ALLOW_NEWUSERS',	$me->config['allow_newusers']);
+@$template->assign('ALLOW_NEWUSERS',	$me->config['allow_newusers']);
 
 // do we send a mail to admins in case of new users ?
-$template->assign('ADVERTISE_ADMINS',	$me->config['advertise_admin_new_ldapuser']);
+@$template->assign('ADVERTISE_ADMINS',	$me->config['advertise_admin_new_ldapuser']);
 
 // do we send the piwigo (!) password to the mail address provided by ldap ?
-$template->assign('SEND_CASUAL_MAIL',	$me->config['send_password_by_mail_ldap']);
+@$template->assign('SEND_CASUAL_MAIL',	$me->config['send_password_by_mail_ldap']);
 
 // Is there a restriction in the ldap users group ?
 // Only members of this ldap group can log in !
-$template->assign('USERS_GROUP',	$me->config['users_group']);
+@$template->assign('USERS_GROUP',	$me->config['users_group']);
 
 if (isset($_POST['save'])){
 
