@@ -31,8 +31,8 @@ $template->assign('LD_GROUP',	$me->config['ld_group']);
 $template->assign('LD_USE_SSL',	$me->config['ld_use_ssl']);
 $template->assign('LD_BINDPW',	$me->config['ld_bindpw']);
 $template->assign('LD_BINDDN',	$me->config['ld_binddn']);
-$template->assign('WEBMASTERS_GROUP',	$me->config['webmasters_group']);
-$template->assign('ADMINS_GROUP',	$me->config['admins_group']);
+@$template->assign('WEBMASTERS_GROUP',	$me->config['webmasters_group']);
+@$template->assign('ADMINS_GROUP',	$me->config['admins_group']);
 
 // if the user hit the save button...
 if (isset($_POST['save'])){
@@ -77,6 +77,7 @@ if (isset($_POST['save'])){
 // Check LDAP configuration
 // the user need to have saved his config to do that.
 if (isset($_POST['check_ldap'])){
+        @$me->check_ldap();
 	if ($me->config['users_group']) {
 		if ($me->user_membership($_POST['USERNAME'],$me->ldap_group($me->config['users_group']))) {
 			if ($me->ldap_bind_as($_POST['USERNAME'],$_POST['PASSWORD'])){

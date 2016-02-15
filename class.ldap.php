@@ -116,7 +116,6 @@ class Ldap {
 				$this->config['uri'] = 'ldap://'.$this->config['host'].':'.$this->config['port'];
 			}
 		}
-
 		// first, we initializes connection to ldap
 		if ($this->cnx = @ldap_connect($this->config['uri'])){
 				@ldap_set_option($this->cnx, LDAP_OPT_PROTOCOL_VERSION, 3); // LDAPv3 if possible
@@ -200,9 +199,11 @@ class Ldap {
 		$sr=@ldap_search($this->cnx, $this->config['basedn'], "($ld_group=$to_search)", array('dn'),0,0);
 		$groups = @ldap_get_entries($this->cnx, $sr);
 		$result = array();
-		foreach ($groups as $group) {
+                if (is_array($groups)){
+		   foreach ($groups as $group) {
 			$result[] = $group['dn'];
-		}
+		   }
+                }
 		return $result;
 	}
 	
@@ -210,8 +211,8 @@ class Ldap {
 		$ld_attr = $this->config['ld_attr'];
 		
 		if(($results=@ldap_search($this->cnx,$this->config['basedn'],"($ld_attr=$to_search)",array('dn','mail',$ld_attr)))!==false)
-		$entry = @ldap_first_entry($this->cnx, $results);
-		if($entry==null)
+		if(($entry = @ldap_first_entry($this->cnx, $results))===false)
+//		if($entry==null)
 		{
 		return false;
 		}
