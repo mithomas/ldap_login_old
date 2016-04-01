@@ -1,7 +1,7 @@
 <?php
 defined('LDAP_LOGIN_PATH') or die('Hacking attempt!');
  
-global $template, $page, $conf;
+global $template, $page;
 
 // get current tab
 $page['tab'] = (isset($_GET['tab'])) ? $_GET['tab'] : $page['tab'] = 'configuration';

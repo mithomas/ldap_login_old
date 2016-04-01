@@ -1,5 +1,4 @@
 <?php
-global $conf;
 class Ldap {
 	var $cnx;
 	var $config;
@@ -58,9 +57,9 @@ class Ldap {
 		// first, load the hard coded defaults, then apply the one from the file.
 		// that way, when we begin setting the conf', there is already sane defaults. And there is no holes in it !
 		$this->load_default_config();
-                global $conf;
-                if (!empty($conf['ldap_login_plugin'])){
-                   $this->config = unserialize($conf['ldap_login_plugin']);
+                $ldap_config = conf_get_param('ldap_login_plugin');
+                if (!empty($ldap_config)){
+                   $this->config = unserialize($ldap_config);
                    $this->full_usersbranch = $this->config['usersbranch'].','.$this->config['basedn'];
                    $this->full_groupbranch = $this->config['groupbranch'].','.$this->config['basedn'];
                 }
