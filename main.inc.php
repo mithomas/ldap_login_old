@@ -54,7 +54,6 @@ function ld_init(){
 }
 
 function fail($username) {
-	//trigger_action('login_failure', stripslashes($username));
 	trigger_notify('login_failure', stripslashes($username));
 	return false;
 }
@@ -63,7 +62,6 @@ function update_user($username,$id) {
 	$up = new Ldap();
 	$up->load_config();
 	$up->ldap_conn() or error_log("Unable to connect LDAP server : ".$up->getErrorString());
-
 	// update user piwigo rights / access according to ldap. Only if it's webmaster / admin, so no normal !
 	if($up->ldap_status($username) !='normal') {
 		single_update(USER_INFOS_TABLE,array('status' => $up->ldap_status($username)),array('user_id' => $id));
@@ -127,9 +125,7 @@ function login($success, $username, $password, $remember_me){
 				update_user($username,$row['id']);
 				
 				log_user($row['id'], $remember_me);
-				//trigger_action('login_success', stripslashes($username));
                                 trigger_notify('login_success', stripslashes($username));
-				
 				return True;
 			}
   	
@@ -153,7 +149,6 @@ function login($success, $username, $password, $remember_me){
 					// now we fetch again his id in the piwigo db, and we get them, as we just created him !
 					log_user($new_id, False);
 					
-					//trigger_action('login_success', stripslashes($username));
 					trigger_notify('login_success', stripslashes($username));
 
 					redirect('profile.php');

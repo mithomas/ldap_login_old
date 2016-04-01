@@ -261,10 +261,8 @@ class Ldap {
 				return 'admin';
 			}
 		}
-		else 
-		{
+                //Default status user
 		return 'normal';
-		}
 	}
 	
 	public function getAttr(){
