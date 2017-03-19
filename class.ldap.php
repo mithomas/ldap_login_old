@@ -19,7 +19,6 @@ class Ldap {
 	 * to ldap_* funcs, usually with ldap_bind().
 	 */
 	public function check_ldap(){
-
 		if (!$this->ldap_conn()) {
 			return $this->getErrorString();
 		}
@@ -58,29 +57,29 @@ class Ldap {
 		// that way, when we begin setting the conf', there is already sane defaults. And there is no holes in it !
 		$this->load_default_config();
                 $ldap_config = conf_get_param('ldap_login_plugin');
-                if (!empty($ldap_config)){
-                   $this->config = unserialize($ldap_config);
-                   $this->full_usersbranch = $this->config['usersbranch'].','.$this->config['basedn'];
-                   $this->full_groupbranch = $this->config['groupbranch'].','.$this->config['basedn'];
-                }
-//		$conf_file = @file_get_contents( LDAP_LOGIN_PATH.'data.dat' );
-//		if ($conf_file!==false)
-//		{
-//			$this->config = unserialize($conf_file);
-//			
-//			// user and groupbranches + basedn make full_groupbranch. 
-//			// that way, we can save one ldap request when logging (see ldap_name).
-//			
-//			$this->full_usersbranch = $this->config['usersbranch'].','.$this->config['basedn'];
- //			$this->full_groupbranch = $this->config['groupbranch'].','.$this->config['basedn'];
-//		}
+//                if (!empty($ldap_config)){
+//                   $this->config = unserialize($ldap_config);
+//                   $this->full_usersbranch = $this->config['usersbranch'].','.$this->config['basedn'];
+//                   $this->full_groupbranch = $this->config['groupbranch'].','.$this->config['basedn'];
+//                }
+		$conf_file = @file_get_contents( LDAP_LOGIN_PATH.'data.dat' );
+		if ($conf_file!==false)
+		{
+			$this->config = unserialize($conf_file);
+			
+			// user and groupbranches + basedn make full_groupbranch. 
+			// that way, we can save one ldap request when logging (see ldap_name).
+			
+			$this->full_usersbranch = $this->config['usersbranch'].','.$this->config['basedn'];
+			$this->full_groupbranch = $this->config['groupbranch'].','.$this->config['basedn'];
+		}
 	}
 
 	public function save_config(){
-		//$file = fopen( LDAP_LOGIN_PATH.'/data.dat', 'w' );
-		//fwrite($file, serialize($this->config) );
-		//fclose( $file );
-                 conf_update_param('ldap_login_plugin', serialize($this->config));
+		$file = fopen( LDAP_LOGIN_PATH.'/data.dat', 'w' );
+		fwrite($file, serialize($this->config) );
+		fclose( $file );
+//                 conf_update_param('ldap_login_plugin', serialize($this->config));
 	}
 
 	// basically loads the menu in piwigo admin.
@@ -159,8 +158,8 @@ class Ldap {
 			return $this->ldap_search_group($groupname);
 		}
 		else {
-		$result[] = $this->config['ld_group'].'='.$groupname.','.$this->full_groupbranch;
-		return $result;
+		    $result[] = $this->config['ld_group'].'='.$groupname.','.$this->full_groupbranch;
+		    return $result;
 		}
 	}
 
@@ -173,7 +172,7 @@ class Ldap {
 
 	// authentication
 	public function ldap_bind_as($user,$user_passwd){
-		if (@ldap_bind($this->cnx,$this->ldap_name($user),$user_passwd)){
+		if (@ldap_bind($this->cnx,$this->ldap_name($user),stripslashes($user_passwd))){
 			return true;
 		}
 		return false;
@@ -234,11 +233,11 @@ class Ldap {
 		// $groups is an array of groupdn ! (there is a possibility of several groups, we search the user in each of them).
 		foreach ($groups as $groupdn) {
 			$filter = '(objectClass=*)';
-			$result = @ldap_read($this->cnx,$groupdn,$filter,array('memberUid'));
+			$result = @ldap_read($this->cnx,$groupdn,$filter,array('member'));
 			$result2 = @ldap_get_entries($this->cnx, $result);
-			if(isset($result2[0]['memberuid'])){
-				foreach($result2[0]['memberuid'] as $item){
-					if ($item == $user){
+			if(isset($result2[0]['member'])){
+				foreach($result2[0]['member'] as $item){
+					if ($item == $this->ldap_name($user)){
 						return True;
 					}
 				}

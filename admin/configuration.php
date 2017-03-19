@@ -85,7 +85,7 @@ if (isset($_POST['check_ldap'])){
 				$group_query = 'SELECT name, id FROM '.GROUPS_TABLE.';';
 				$groups = pwg_query($group_query);
 				$sentence = '';
-	
+
 				foreach($groups as $group) {
 					if($me->user_membership($_POST['USERNAME'], $me->ldap_group($group['name']))) {
 						$sentence = $sentence . ', '.$group['name'];
