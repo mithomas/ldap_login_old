@@ -2,6 +2,8 @@
 class Ldap {
 	var $cnx;
 	var $config;
+	var $full_usersbranch;
+	var $full_groupbranch;
 
 	// for debug
 	public function write_log($message){
@@ -234,13 +236,16 @@ class Ldap {
 		foreach ($groups as $groupdn) {
 			$filter = '(objectClass=*)';
 			$result = @ldap_read($this->cnx,$groupdn,$filter,array('member'));
-			$result2 = @ldap_get_entries($this->cnx, $result);
-			if(isset($result2[0]['member'])){
-				foreach($result2[0]['member'] as $item){
-					if ($item == $this->ldap_name($user)){
-						return True;
-					}
+			
+			if($result !== false){
+			    $result2 = @ldap_get_entries($this->cnx, $result);
+			    if(isset($result2[0]['member'])){
+			    	foreach($result2[0]['member'] as $item){
+				    if ($item == $this->ldap_name($user)){
+					return True;
+				    }
 				}
+			    }
 			}
 		}
 		return False;
